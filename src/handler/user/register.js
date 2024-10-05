@@ -1,5 +1,5 @@
 import { Handler } from '../../handler.js';
-import { User, UserModel } from '../../model/user.js';
+import { DefaultPriv, User, UserModel } from '../../model/user.js';
 import validator from 'email-validator';
 import { hash } from '../../lib/hash.js';
 
@@ -26,7 +26,7 @@ class UserRegisterHandler extends Handler {
             return;
         }
         const passwordHashed = hash(password);
-        await UserModel.add(new User(0, uname, passwordHashed, email));
+        await UserModel.add(new User(0, uname, passwordHashed, email, DefaultPriv));
         this.response.body = { success: true };
     }
 }

@@ -21,6 +21,7 @@ export const PRIV = {
 
     USER_PROFILE: 1024n,
 };
+export const DefaultPriv = PRIV.ADD_BLOG | PRIV.DELETE_SELF_BLOG | PRIV.EDIT_SELF_BLOG | PRIV.ADD_COMMENT | PRIV.EDIT_SELF_COMMENT | PRIV.USER_PROFILE | PRIV.USER_PROFILE;
 
 export class User {
     /**
