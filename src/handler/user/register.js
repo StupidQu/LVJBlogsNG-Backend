@@ -1,5 +1,5 @@
 import { Handler } from '../../handler.js';
-import { DefaultPriv, User, UserModel } from '../../model/user.js';
+import { DefaultPriv, PRIV, User, UserModel } from '../../model/user.js';
 import validator from 'email-validator';
 import { hash } from '../../lib/hash.js';
 
@@ -9,6 +9,10 @@ class UserRegisterHandler extends Handler {
          * @type {{uname: string, password: string, email: string}}
          */
         const { uname, password, email } = this.ctx.request.body;
+        if (this.user.hasPriv(PRIV.USER_PROFILE)) {
+            this.fail('You are already logged in.');
+            return;
+        }
         if (uname.length < 3 || uname.length > 20) {
             this.fail('Username must be between 3 and 20 characters.');
             return;
