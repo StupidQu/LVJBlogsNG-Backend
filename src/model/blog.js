@@ -104,13 +104,23 @@ export class BlogModel {
     }
 
     /**
-     * 
+     * Get all the comments of a blog.
      * @param {number} blogId 
+     * @param {number?} limit
      * @returns {Promise<Comment[]>}
      */
-    static async getComments(blogId) {
-        const comments = await db.all('SELECT * FROM comments WHERE blogId=?', [blogId]);
+    static async getComments(blogId, limit = 20) {
+        const comments = await db.all('SELECT * FROM comments WHERE blogId=? ORDER BY createTime DESC LIMIT ?', [blogId, limit]);
         return comments;
+    }
+
+    /**
+     * Get a comment.
+     * @param {number} commentId 
+     * @returns {Promise<Comment>}
+     */
+    static async getComment(commentId) {
+        return await db.get('SELECT * FROM comments WHERE commentId=?', [commentId]);
     }
 
     /**

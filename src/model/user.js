@@ -15,8 +15,8 @@ export const PRIV = {
 
     ADD_COMMENT: 1 << 5,
     DELETE_SELF_COMMENT: 1 << 6,
-    EDIT_SELF_COMMENT: 1 << 7,
-    EDIT_COMMENT: 1 << 8,
+    EDIT_SELF_COMMENT: 1 << 7, // useless
+    EDIT_COMMENT: 1 << 8, // useless
     DELETE_COMMENT: 1 << 9,
 
     USER_PROFILE: 1 << 10,
