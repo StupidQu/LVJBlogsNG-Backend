@@ -5,7 +5,9 @@ import { UserModel } from '../model/user.js';
 
 export class HomepageHandler extends Handler {
     async get() {
-        const blogs = await BlogModel.getMulti();
+        const blogs = (await BlogModel.getMulti()).map((blog) => {
+            return {...blog, content: blog.content.slice(0, 100)};
+        });
         const users = await UserModel.getList(_.uniq(blogs.map(blog => blog.author)));
         const usersDict = _.keyBy(users, 'uid');
         this.response.body = {

@@ -144,7 +144,7 @@ export class BlogModel {
      * @param {number} skip
      * @param {number} limit
      * @param {string?} extraSQL
-     * @returns Promise<{blogId: number}[]>
+     * @returns {Promise<Blog[]>}
      */
     static async getMulti(skip = 0, limit = 10, extraSQL = '') {
         if (extraSQL.length > 0) extraSQL = `WHERE ${extraSQL}`;
