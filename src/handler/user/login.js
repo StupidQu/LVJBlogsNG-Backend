@@ -28,6 +28,7 @@ class UserLoginHandler extends Handler {
             success: true,
             sessionId: session.sessionId,
         };
+        this.user = user;
     }
 }
 

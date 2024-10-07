@@ -4,10 +4,15 @@ import { User, UserModel } from './model/user.js';
 import SessionModel from './model/session.js';
 import Router from '@koa/router';
 import koaBodyparser from 'koa-bodyparser';
+import log4js from 'log4js';
+import koaCors from '@koa/cors';
 
 
 const app = new koa();
 const router = new Router();
+
+const logger = log4js.getLogger();
+logger.level = 'debug';
 
 export async function registerHandler(name, path, handlerClass) {
     router.all(name, path, async (ctx, next) => {
@@ -18,6 +23,7 @@ export async function registerHandler(name, path, handlerClass) {
             return;
         }
         const steps = ['__init', '_init', 'init', method, 'after', '_after', '__after'];
+        logger.debug(`${ctx.state.user.uname}(${ctx.state.sessionId}) ${ctx.method}: ${path}.`);
         try {
             for (const step of steps) {
                 if (typeof handler[step] === 'function') await handler[step]();
@@ -26,24 +32,30 @@ export async function registerHandler(name, path, handlerClass) {
             ctx.response.status = 200;
             ctx.set({ 'Content-Type': 'application/json' });
         } catch (e) {
-            ctx.throw(e.message, 403);
+            ctx.response.status = 403;
+            ctx.body = { success: false, msg: e.message };
+            ctx.set({ 'Content-Type': 'application/json' });
         }
         await next();
     });
 };
 
+app.use(koaCors());
 app.use(koaBodyparser());
-app
-    .use(router.routes())
-    .use(router.allowedMethods());
 app.use(async (ctx, next) => {
-    const sessionId = ctx.request.headers['X-Session-Id'] || '';
+    const sessionId = ctx.request.headers['x-session-id'] || '';
     let session = await SessionModel.get(sessionId);
-    if (!session) session = await SessionModel.add(1);
+    if (!session) {
+        session = await SessionModel.getOneByUser(1);
+        if (!session) session = await SessionModel.add(1);
+    }
     ctx.state.sessionId = session.sessionId;
     ctx.state.user = session ? await UserModel.getById(session.uid) : new User(1, 'Guest');
     await next();
 });
+app
+    .use(router.routes())
+    .use(router.allowedMethods());
 
 /**
  * 

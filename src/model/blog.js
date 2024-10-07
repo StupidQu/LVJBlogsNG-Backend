@@ -35,31 +35,31 @@ db.run(`CREATE TABLE IF NOT EXISTS blog(
     blogId INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
     content TEXT,
-    author INT,
-    createTime TEXT,
-    updateTime TEXT
+    author INTEGER,
+    createTime INTEGER,
+    updateTime INTEGER
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS comments(
     commentId INTEGER PRIMARY KEY AUTOINCREMENT,
-    blogId INT,
+    blogId INTEGER,
     content TEXT,
-    author INT,
-    createTime TEXT,
-    updateTime TEXT
+    author INTEGER,
+    createTime INTEGER,
+    updateTime INTEGER
 )`);
 
 export class BlogModel {
     /**
-     * 
+     * Add a blog.
      * @param {string} title
      * @param {string} content
      * @param {number} author 
-     * @returns {number}
+     * @returns {Promise<number>}
      */
     static async add(title, content, author) {
-        const { blogId } = await db.run('INSERT INTO blog(title, content, author, createTime, updateTime) VALUES(?, ?, ?, ?, ?)', [title, content, author, Date.now(), Date.now()]);
-        return blogId;
+        const { lastID } = await db.run('INSERT INTO blog(title, content, author, createTime, updateTime) VALUES(?, ?, ?, ?, ?)', [title, content, author, Date.now(), Date.now()]);
+        return lastID;
     }
 
     /**
@@ -99,8 +99,8 @@ export class BlogModel {
      * @returns {Promise<number>}
      */
     static async addComment(blogId, content, author) {
-        const { commentId } = await db.run('INSERT INTO comments(blogId, content, author, createTime, updateTime) VALUES(?, ?, ?, ?, ?)', [blogId, content, author, Date.now(), Date.now()]);
-        return commentId;
+        const { lastID } = await db.run('INSERT INTO comments(blogId, content, author, createTime, updateTime) VALUES(?, ?, ?, ?, ?)', [blogId, content, author, Date.now(), Date.now()]);
+        return lastID;
     }
 
     /**
@@ -140,10 +140,15 @@ export class BlogModel {
     }
 
     /**
-     * 
+     * Get multi blogs
+     * @param {number} skip
+     * @param {number} limit
+     * @param {string?} extraSQL
      * @returns Promise<{blogId: number}[]>
      */
-    static async getMulti() {
-        return await db.all('SELECT blogId FROM blog ORDER BY createTime DESC');
+    static async getMulti(skip = 0, limit = 10, extraSQL = '') {
+        if (extraSQL.length > 0) extraSQL = `WHERE ${extraSQL}`;
+        return await db.all(`SELECT * FROM blog ${extraSQL} ORDER BY createTime DESC LIMIT ${limit} ${skip ? ('OFFSET ' + skip.toString()) : ''}`);
     }
 };
+ 

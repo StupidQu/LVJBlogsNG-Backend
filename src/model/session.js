@@ -66,4 +66,9 @@ export default class SessionModel {
         await db.run('DELETE FROM session WHERE sessionId = ?', [sessionId]);
         sessionCache.delete(sessionId);
     }
+
+    static async getOneByUser(uid) {
+        const row = await db.get('SELECT * FROM session WHERE uid = ?', [uid]);
+        return row ? new Session(row.uid, row.sessionId, row.expireAt) : null;
+    }
 };

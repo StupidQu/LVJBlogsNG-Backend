@@ -4,22 +4,22 @@ import _ from 'lodash';
 
 /**
  * @readonly
- * @enum {BigInt}
+ * @enum {number}
  */
 export const PRIV = {
-    ADD_BLOG: 1n,
-    DELETE_SELF_BLOG: 2n,
-    EDIT_SELF_BLOG: 4n,
-    EDIT_BLOG: 8n,
-    DELETE_BLOG: 16n,
+    ADD_BLOG: 1 << 0,
+    DELETE_SELF_BLOG: 1 << 1,
+    EDIT_SELF_BLOG: 1 << 2,
+    EDIT_BLOG: 1 << 3,
+    DELETE_BLOG: 1 << 4,
 
-    ADD_COMMENT: 32n,
-    DELETE_SELF_COMMENT: 64n,
-    EDIT_SELF_COMMENT: 128n,
-    EDIT_COMMENT: 256n,
-    DELETE_COMMENT: 512n,
+    ADD_COMMENT: 1 << 5,
+    DELETE_SELF_COMMENT: 1 << 6,
+    EDIT_SELF_COMMENT: 1 << 7,
+    EDIT_COMMENT: 1 << 8,
+    DELETE_COMMENT: 1 << 9,
 
-    USER_PROFILE: 1024n,
+    USER_PROFILE: 1 << 10,
 };
 export const DefaultPriv = PRIV.ADD_BLOG | PRIV.DELETE_SELF_BLOG | PRIV.EDIT_SELF_BLOG | PRIV.ADD_COMMENT | PRIV.EDIT_SELF_COMMENT | PRIV.USER_PROFILE | PRIV.USER_PROFILE;
 
@@ -29,7 +29,7 @@ export class User {
      * @param {string} [uname=""]
      * @param {string} [password=""]
      * @param {string} [email="default@zshfoj.com"]
-     * @param {BigInt} [priv=0]
+     * @param {number} [priv=0]
      * @param {string} [avatar=""]
      * @param {string} [description=""]
      */
@@ -49,7 +49,7 @@ export class User {
 
     /**
      * 
-     * @param {BigInt} priv
+     * @param {number} priv
      * @returns 
      */
     hasPriv(priv) {
@@ -62,7 +62,9 @@ await db.run(`CREATE TABLE IF NOT EXISTS user(
     uname TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     email TEXT NOT NULL,
-    priv BIGINT
+    priv INTEGER,
+    avatar TEXT,
+    description TEXT
 )`);
 await db.run('CREATE UNIQUE INDEX IF NOT EXISTS user_uname ON user(uname)');
 
@@ -75,7 +77,7 @@ export class UserModel {
     static async getById(uid) {
         const row = await db.get('SELECT * FROM user WHERE uid=?', [uid]);
         if (!row) throw new Error(`User ${uid} not found.`);
-        return new User(row.uid, row.uname, row.password, row.email, BigInt(row.priv));
+        return new User(row.uid, row.uname, row.password, row.email, row.priv);
     }
 
     /**
@@ -86,7 +88,7 @@ export class UserModel {
     static async getByName(uname) {
         const row = await db.get('SELECT * FROM user WHERE uname=?', [uname]);
         if (!row) throw new Error(`User ${uname} not found.`);
-        return new User(row.uid, row.uname, row.password, row.email, BigInt(row.priv));
+        return new User(row.uid, row.uname, row.password, row.email, row.priv);
     }
 
     /**
@@ -95,8 +97,8 @@ export class UserModel {
      * @returns {Promise<number>}
      */
     static async add(user) {
-        const { uid } = await db.run('INSERT INTO user(uname, password, email, priv) VALUES(?, ?, ?, ?)', [user.uname, user.password, user.email, user.priv]);
-        return uid;
+        const { lastID } = await db.run('INSERT INTO user(uname, password, email, priv, avatar, description) VALUES(?, ?, ?, ?, ?, ?)', [user.uname, user.password, user.email, user.priv, user.avatar, user.description]);
+        return lastID;
     }
 
     /**
@@ -105,7 +107,7 @@ export class UserModel {
      * @returns {Promise<User>}
      */
     static async update(user) {
-        await db.run('UPDATE user SET uname=?, password=?, email=?, priv=? WHERE uid=?', [user.uname, user.password, user.email, user.priv, user.uid]);
+        await db.run('UPDATE user SET uname=?, password=?, email=?, priv=?, avatar=?, description=? WHERE uid=?', [user.uname, user.password, user.email, user.priv, user.uid, user.avatar, user.description]);
         return await UserModel.getById(user.uid);
     }
 
@@ -117,6 +119,14 @@ export class UserModel {
     static async exists(uname) {
         const row = await db.get('SELECT * FROM user WHERE uname=?', [uname]);
         return !!row;
+    }
+
+    /**
+     * Get a list of users for render.
+     * @param {number[]} users 
+     */
+    static async getList(users) {
+        return await db.all(`SELECT uid, uname, description, avatar FROM user WHERE uid IN (${users.join(',')})`);
     }
 };
 
