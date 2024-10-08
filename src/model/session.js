@@ -58,6 +58,11 @@ export default class SessionModel {
     }
 
     static async clearExpired() {
+        sessionCache.forEach(session => {
+            if (session.expireAt < Date.now()) {
+                sessionCache.delete(session.sessionId);
+            }
+        });
         await db.run('DELETE FROM session WHERE expireAt < ?', [Date.now()]);
     }
 
