@@ -57,6 +57,10 @@ export default class SessionModel {
         return new Session(row.uid, row.sessionId, Date.now() + TIME_3_HOURS);
     }
 
+    static async has(sessionId) {
+        return !!sessionCache.get(sessionId) || !!await db.get('SELECT * FROM session WHERE sessionId = ?', [sessionId]);
+    }
+
     static async clearExpired() {
         sessionCache.forEach(session => {
             if (session.expireAt < Date.now()) {
@@ -67,7 +71,7 @@ export default class SessionModel {
     }
 
     static async delete(sessionId) {
-        if (!this.get(sessionId)) return;
+        if (!this.has(sessionId)) return;
         await db.run('DELETE FROM session WHERE sessionId = ?', [sessionId]);
         sessionCache.delete(sessionId);
     }
