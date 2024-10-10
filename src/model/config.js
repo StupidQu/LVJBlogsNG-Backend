@@ -1,13 +1,14 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import yaml from 'js-yaml';
+import { upgradeScripts } from '../upgrade.scripts.js';
 import PRIV from '../lib/priv.js';
+import yaml from 'js-yaml';
 
 export class Config {
     loggerLevel = 'debug';
     
     defaultPriv = PRIV.ADD_BLOG | PRIV.DELETE_SELF_BLOG | PRIV.EDIT_SELF_BLOG | PRIV.ADD_COMMENT | PRIV.EDIT_SELF_COMMENT | PRIV.DELETE_SELF_COMMENT | PRIV.USER_PROFILE | PRIV.USER_PROFILE;
     
-    dbVersion = 0;
+    dbVersion = upgradeScripts.length;
     
     serverPort = 3030;
     serverHost = '0.0.0.0';
