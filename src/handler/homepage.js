@@ -5,7 +5,7 @@ import { UserModel } from '../model/user.js';
 
 export class HomepageHandler extends Handler {
     async get() {
-        const blogs = (await BlogModel.getMulti()).map((blog) => {
+        const blogs = (await BlogModel.getMulti(0, 10, 'password IS NULL')).map((blog) => {
             return {...blog, content: blog.content.slice(0, 100)};
         });
         const users = await UserModel.getList(_.uniq(blogs.map(blog => blog.author)));

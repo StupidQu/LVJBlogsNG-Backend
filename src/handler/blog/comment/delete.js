@@ -8,7 +8,8 @@ class CommentDeleteHandler extends Handler {
         const blog = await BlogModel.get(bid);
         if (!blog) return this.fail('Blog not found.');
         const comment = await BlogModel.getComment(id);
-        
+        if (!comment) return this.fail('Comment not found.');
+
         this.checkPriv(comment.author === this.user.uid ? PRIV.DELETE_SELF_COMMENT : PRIV.DELETE_COMMENT);
         await BlogModel.deleteComment(id);
        

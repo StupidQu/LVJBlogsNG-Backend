@@ -1,8 +1,8 @@
 import { User } from './model/user.js';
 
 export class Handler {
-    user = new User(0, 'Guest');
-    response = { body: {} };
+    user = new User(1, 'Guest');
+    response = { body: {}, skipNext: false };
     /** @type {koa.Context} */
     ctx;
 
@@ -25,10 +25,12 @@ export class Handler {
 
     /**
      * 
-     * @param {string} msg 
+     * @param {string} msg
+     * @param {number?} failStatusCode 
      */
-    fail(msg) {
-        this.response.body = { success: false, msg };
+    fail(msg, failStatusCode = 0) {
+        this.response.body = { success: false, msg, failStatusCode };
+        this.response.skipNext = true;
     }
 
     async __after() {

@@ -1,14 +1,13 @@
-import { Handler } from '../../../handler.js';
+import { BlogDetailBaseHandler } from '../detail.js';
 import { BlogModel } from '../../../model/blog.js';
 import { PRIV } from '../../../model/user.js';
 
-class CommentCreateHandler extends Handler {
+class CommentCreateHandler extends BlogDetailBaseHandler {
     async post() {
         this.checkPriv(PRIV.ADD_COMMENT);
         /** @type {{title: string, content: string}} */
         const { content } = this.ctx.request.body;
-        const { id } = this.ctx.request.params;
-        const commentId = await BlogModel.addComment(id, content, this.user.uid);
+        const commentId = await BlogModel.addComment(this.blogId, content, this.user.uid);
         this.response.body = { success: true, commentId };
     }
 }

@@ -20,14 +20,16 @@ export class Blog {
      * @param {number} author 
      * @param {number} createTime 
      * @param {number} updateTime 
+     * @param {string?} password
      */
-    constructor(blogId, title, content, author, createTime, updateTime) {
+    constructor(blogId, title, content, author, createTime, updateTime, password = '') {
         this.blogId = blogId;
         this.title = title;
         this.content = content;
         this.author = author;
         this.createTime = createTime;
         this.updateTime = updateTime;
+        this.password = password;
     }
 };
 
@@ -37,7 +39,8 @@ db.run(`CREATE TABLE IF NOT EXISTS blog(
     content TEXT,
     author INTEGER,
     createTime INTEGER,
-    updateTime INTEGER
+    updateTime INTEGER,
+    password TEXT
 )`);
 
 db.run(`CREATE TABLE IF NOT EXISTS comments(
@@ -55,10 +58,11 @@ export class BlogModel {
      * @param {string} title
      * @param {string} content
      * @param {number} author 
+     * @param {string?} password
      * @returns {Promise<number>}
      */
-    static async add(title, content, author) {
-        const { lastID } = await db.run('INSERT INTO blog(title, content, author, createTime, updateTime) VALUES(?, ?, ?, ?, ?)', [title, content, author, Date.now(), Date.now()]);
+    static async add(title, content, author, password = undefined) {
+        const { lastID } = await db.run('INSERT INTO blog(title, content, author, createTime, updateTime, password) VALUES(?, ?, ?, ?, ?, ?)', [title, content, author, Date.now(), Date.now(), password]);
         return lastID;
     }
 
@@ -76,10 +80,11 @@ export class BlogModel {
      * @param {number} blogId
      * @param {string} title
      * @param {string} content
+     * @param {string?} password
      * @returns {Promise<void>}
      */
-    static async edit(blogId, title, content) {
-        await db.run('UPDATE blog SET title=?, content=?, updateTime=? WHERE blogId=?', [title, content, Date.now(), blogId]);
+    static async edit(blogId, title, content, password = undefined) {
+        await db.run('UPDATE blog SET title=?, content=?, updateTime=?, password=? WHERE blogId=?', [title, content, Date.now(), password, blogId]);
     }
 
     /**

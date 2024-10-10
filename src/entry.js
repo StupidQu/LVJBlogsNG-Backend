@@ -4,15 +4,15 @@ import { User, UserModel } from './model/user.js';
 import SessionModel from './model/session.js';
 import Router from '@koa/router';
 import koaBodyparser from 'koa-bodyparser';
-import log4js from 'log4js';
 import koaCors from '@koa/cors';
-
+import * as config from './model/config.js';
+import upgrade from './upgrade.js';
+import getLogger from './lib/logger.js';
 
 const app = new koa();
 const router = new Router();
 
-const logger = log4js.getLogger();
-logger.level = 'debug';
+const logger = getLogger();
 
 export async function registerHandler(name, path, handlerClass) {
     router.all(name, path, async (ctx, next) => {
@@ -27,6 +27,7 @@ export async function registerHandler(name, path, handlerClass) {
         try {
             for (const step of steps) {
                 if (typeof handler[step] === 'function') await handler[step]();
+                if (handler.response.skipNext) break;
             }
             ctx.body = handler.response.body;
             ctx.response.status = 200;
@@ -35,6 +36,7 @@ export async function registerHandler(name, path, handlerClass) {
             ctx.response.status = 403;
             ctx.body = { success: false, msg: e.message };
             ctx.set({ 'Content-Type': 'application/json' });
+            console.error(e.stack);
         }
         await next();
     });
@@ -56,6 +58,8 @@ app.use(async (ctx, next) => {
 app
     .use(router.routes())
     .use(router.allowedMethods());
+
+await upgrade();
 
 /**
  * 
@@ -83,4 +87,4 @@ processHandlerForDir('./handler');
 
 await SessionModel.clearExpired();
 
-app.listen(3030);
+app.listen(config.get('serverPort'), config.get('serverHost'));

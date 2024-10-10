@@ -1,5 +1,5 @@
-import { Handler } from '../../handler.js';
 import { BlogModel } from '../../model/blog.js';
+import { Handler } from '../../handler.js';
 import { PRIV } from '../../model/user.js';
 
 class BlogDeleteHandler extends Handler {

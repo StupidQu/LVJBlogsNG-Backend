@@ -1,27 +1,12 @@
 import { nanoid } from 'nanoid';
 import db from '../lib/db.js';
 import _ from 'lodash';
+import * as config from './config.js';
+import __P from '../lib/priv.js';
 
-/**
- * @readonly
- * @enum {number}
- */
-export const PRIV = {
-    ADD_BLOG: 1 << 0,
-    DELETE_SELF_BLOG: 1 << 1,
-    EDIT_SELF_BLOG: 1 << 2,
-    EDIT_BLOG: 1 << 3,
-    DELETE_BLOG: 1 << 4,
-
-    ADD_COMMENT: 1 << 5,
-    DELETE_SELF_COMMENT: 1 << 6,
-    EDIT_SELF_COMMENT: 1 << 7, // useless
-    EDIT_COMMENT: 1 << 8, // useless
-    DELETE_COMMENT: 1 << 9,
-
-    USER_PROFILE: 1 << 10,
-};
-export const DefaultPriv = PRIV.ADD_BLOG | PRIV.DELETE_SELF_BLOG | PRIV.EDIT_SELF_BLOG | PRIV.ADD_COMMENT | PRIV.EDIT_SELF_COMMENT | PRIV.DELETE_SELF_COMMENT | PRIV.USER_PROFILE | PRIV.USER_PROFILE;
+/** @type {typeof __P} */
+export const PRIV = __P; // why??
+export const DefaultPriv = config.get('defaultPriv');
 
 export class User {
     /**
