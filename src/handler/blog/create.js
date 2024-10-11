@@ -5,6 +5,7 @@ import { PRIV } from '../../model/user.js';
 class BlogCreateHandler extends Handler {
     async post() {
         this.checkPriv(PRIV.ADD_BLOG);
+        await this.limit('create_blog', 600, 10);
         /** @type {{title: string, content: string, password: string | undefined}} */
         const { title, content, password } = this.ctx.request.body;
         if (title.length > 100 || content.length > 500 * 1024 || (password?.length || 0) >= 255) {

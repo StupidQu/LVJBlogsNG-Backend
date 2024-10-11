@@ -5,6 +5,7 @@ import { PRIV } from '../../../model/user.js';
 class CommentCreateHandler extends BlogDetailBaseHandler {
     async post() {
         this.checkPriv(PRIV.ADD_COMMENT);
+        await this.limit('create_comment', 60, 10);
         /** @type {{title: string, content: string}} */
         const { content } = this.ctx.request.body;
         const commentId = await BlogModel.addComment(this.blogId, content, this.user.uid);

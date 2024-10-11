@@ -9,6 +9,7 @@ class UserRegisterHandler extends Handler {
          * @type {{uname: string, password: string, email: string}}
          */
         const { uname, password, email } = this.ctx.request.body;
+        await this.limit('add_user', 600, 10, true);
         if (this.user.hasPriv(PRIV.USER_PROFILE)) {
             this.fail('You are already logged in.');
             return;

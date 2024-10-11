@@ -37,7 +37,7 @@ export async function registerHandler(name, path, handlerClass) {
             ctx.response.status = 403;
             ctx.body = { success: false, msg: e.message };
             ctx.set({ 'Content-Type': 'application/json' });
-            logger.error(e.stack);
+            logger.error(e);
         }
         await next();
     });

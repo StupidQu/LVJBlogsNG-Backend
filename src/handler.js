@@ -1,3 +1,4 @@
+import OpLogModel from './model/oplog.js';
 import { User } from './model/user.js';
 
 export class Handler {
@@ -33,6 +34,10 @@ export class Handler {
         this.response.skipNext = true;
     }
 
+    async __init() {
+        await this.limit('access', 5, 10);
+    }
+
     async __after() {
         const doSerialize = async (object) => {
             for (const key in object) {
@@ -42,5 +47,21 @@ export class Handler {
             }
         };
         await doSerialize(this.response.body);
+    }
+
+    /**
+     * Limit the rate of a user.
+     * @param {string} operation 
+     * @param {number} duration In second.
+     * @param {number} limit Max operations per duration.
+     * @param {boolean} onlyByIp
+     */
+    async limit(operation, duration, limit, onlyByIp = false) {
+        const [CountIp, CountUser] = await Promise.all([
+            OpLogModel.countByIp(operation, this.ctx.request.ip, Date.now() - duration),
+            OpLogModel.countByUser(operation, this.user, Date.now() - duration)
+        ]);
+        if (CountIp >= limit || (!onlyByIp && CountUser >= limit)) throw new Error('Rate limit exceeded.');
+        await OpLogModel.add(operation, this.user, this.ctx.request.ip);
     }
 };
