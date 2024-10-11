@@ -1,7 +1,6 @@
 import { upgradeScripts } from './upgrade.scripts.js';
 import * as config from './model/config.js';
 import getLogger from './lib/logger.js';
-import db from './lib/db.js';
 
 const logger = getLogger('upgrade');
 
