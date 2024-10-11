@@ -12,6 +12,12 @@ export class Config {
     
     serverPort = 3030;
     serverHost = '0.0.0.0';
+
+    tencentKeyId = '';
+    tencentSecretKey = '';
+
+    emailSender = '';
+    registerMailTemplateId = 0;
 };
 
 if (!existsSync('./data/config.yaml')) {

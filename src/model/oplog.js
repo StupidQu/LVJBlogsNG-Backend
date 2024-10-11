@@ -5,7 +5,8 @@ await db.run(`CREATE TABLE IF NOT EXISTS oplog(
     operation VARCHAR(255) NOT NULL,
     user INTEGER NOT NULL,
     ip VARCHAR(32) NOT NULL,
-    time INTEGER NOT NULL
+    time INTEGER NOT NULL,
+    extraInfo TEXT
 )`);
 
 export default class OpLogModel {
@@ -14,9 +15,10 @@ export default class OpLogModel {
      * @param {string} operation 
      * @param {number} user 
      * @param {string} ip 
+     * @param {string?} extraInfo
      */
-    static async add(operation, user, ip) {
-        await db.run('INSERT INTO oplog(operation, user, ip, time) VALUES(?, ?, ?, ?)', [operation, user, ip, Date.now()]);
+    static async add(operation, user, ip, extraInfo = '') {
+        await db.run('INSERT INTO oplog(operation, user, ip, time, extraInfo) VALUES(?, ?, ?, ?, ?)', [operation, user, ip, Date.now(), extraInfo]);
     }
 
     /**

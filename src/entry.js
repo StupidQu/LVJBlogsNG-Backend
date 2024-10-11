@@ -24,7 +24,7 @@ export async function registerHandler(name, path, handlerClass) {
             return;
         }
         const steps = ['__init', '_init', 'init', method, 'after', '_after', '__after'];
-        logger.debug(`${ctx.state.user.uname}(${ctx.state.sessionId}) ${ctx.method}: ${path}.`);
+        const startTime = Date.now();
         try {
             for (const step of steps) {
                 if (typeof handler[step] === 'function') await handler[step]();
@@ -37,8 +37,10 @@ export async function registerHandler(name, path, handlerClass) {
             ctx.response.status = 403;
             ctx.body = { success: false, msg: e.message };
             ctx.set({ 'Content-Type': 'application/json' });
-            logger.error(e);
+            logger.error(`${ctx.state.user.uname}(${ctx.state.sessionId}) ${ctx.method}: ${path} ERROR: ${e.message}`);
         }
+        const endTime = Date.now();
+        logger.debug(`${ctx.state.user.uname}(${ctx.state.sessionId}) ${ctx.method}: ${path} (${endTime - startTime}ms, ${ctx.response.status}).`);
         await next();
     });
 };

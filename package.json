@@ -10,7 +10,8 @@
     "log4js": "^6.9.1",
     "nanoid": "^5.0.7",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "tencentcloud-sdk-nodejs-ses": "^4.0.948"
   },
   "scripts": {
     "start": "cd src && node entry.js"

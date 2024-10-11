@@ -57,11 +57,12 @@ export class Handler {
      * @param {boolean} onlyByIp
      */
     async limit(operation, duration, limit, onlyByIp = false) {
+        duration *= 1000;
         const [CountIp, CountUser] = await Promise.all([
             OpLogModel.countByIp(operation, this.ctx.request.ip, Date.now() - duration),
-            OpLogModel.countByUser(operation, this.user, Date.now() - duration)
+            OpLogModel.countByUser(operation, this.user.uid, Date.now() - duration)
         ]);
         if (CountIp >= limit || (!onlyByIp && CountUser >= limit)) throw new Error('Rate limit exceeded.');
-        await OpLogModel.add(operation, this.user, this.ctx.request.ip);
+        await OpLogModel.add(operation, this.user.uid, this.ctx.request.ip);
     }
 };
