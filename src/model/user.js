@@ -26,6 +26,7 @@ export class User {
         this.priv = priv;
         this.avatar = avatar;
         this.description = description;
+        this.unameLower = uname.toLocaleLowerCase();
     }
 
     serialize() {
@@ -49,7 +50,8 @@ await db.run(`CREATE TABLE IF NOT EXISTS user(
     email TEXT NOT NULL,
     priv INTEGER,
     avatar TEXT,
-    description TEXT
+    description TEXT,
+    unameLower TEXT
 )`);
 await db.run('CREATE UNIQUE INDEX IF NOT EXISTS user_uname ON user(uname)');
 
@@ -62,7 +64,7 @@ export class UserModel {
     static async getById(uid) {
         const row = await db.get('SELECT * FROM user WHERE uid=?', [uid]);
         if (!row) throw new Error(`User ${uid} not found.`);
-        return new User(row.uid, row.uname, row.password, row.email, row.priv);
+        return new User(row.uid, row.uname, row.password, row.email, row.priv, row.avatar, row.description);
     }
 
     /**
@@ -71,9 +73,9 @@ export class UserModel {
      * @returns {Promise<User>}
      */
     static async getByName(uname) {
-        const row = await db.get('SELECT * FROM user WHERE uname=?', [uname]);
+        const row = await db.get('SELECT * FROM user WHERE unameLower=?', [uname.toLowerCase()]);
         if (!row) throw new Error(`User ${uname} not found.`);
-        return new User(row.uid, row.uname, row.password, row.email, row.priv);
+        return new User(row.uid, row.uname, row.password, row.email, row.priv, row.avatar, row.description);
     }
 
     /**
@@ -82,7 +84,7 @@ export class UserModel {
      * @returns {Promise<number>}
      */
     static async add(user) {
-        const { lastID } = await db.run('INSERT INTO user(uname, password, email, priv, avatar, description) VALUES(?, ?, ?, ?, ?, ?)', [user.uname, user.password, user.email, user.priv, user.avatar, user.description]);
+        const { lastID } = await db.run('INSERT INTO user(uname, password, email, priv, avatar, description, unameLower) VALUES(?, ?, ?, ?, ?, ?, ?)', [user.uname, user.password, user.email, user.priv, user.avatar, user.description, user.uname.toLowerCase()]);
         return lastID;
     }
 
@@ -92,7 +94,7 @@ export class UserModel {
      * @returns {Promise<User>}
      */
     static async update(user) {
-        await db.run('UPDATE user SET uname=?, password=?, email=?, priv=?, avatar=?, description=? WHERE uid=?', [user.uname, user.password, user.email, user.priv, user.uid, user.avatar, user.description]);
+        await db.run('UPDATE user SET uname=?, password=?, email=?, priv=?, avatar=?, description=?, unameLower=? WHERE uid=?', [user.uname, user.password, user.email, user.priv, user.avatar, user.description, user.uname.toLocaleLowerCase(), user.uid]);
         return await UserModel.getById(user.uid);
     }
 
@@ -102,7 +104,7 @@ export class UserModel {
      * @returns Promise<boolean>
      */
     static async exists(uname) {
-        const row = await db.get('SELECT * FROM user WHERE uname=?', [uname]);
+        const row = await db.get('SELECT * FROM user WHERE unameLower=?', [uname.toLowerCase()]);
         return !!row;
     }
 

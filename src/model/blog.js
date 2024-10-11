@@ -21,8 +21,9 @@ export class Blog {
      * @param {number} createTime 
      * @param {number} updateTime 
      * @param {string?} password
+     * @param {number?} commentsCount
      */
-    constructor(blogId, title, content, author, createTime, updateTime, password = '') {
+    constructor(blogId, title, content, author, createTime, updateTime, password = '', commentsCount = 0) {
         this.blogId = blogId;
         this.title = title;
         this.content = content;
@@ -30,8 +31,19 @@ export class Blog {
         this.createTime = createTime;
         this.updateTime = updateTime;
         this.password = password;
+        this.commentsCount = commentsCount;
+    }
+
+    serialize() {
+        if (this.password && this.password !== '') this.protected = true;
+        delete this.password;
+        return this;
     }
 };
+
+function blogFromRow(row) {
+    return new Blog(row.blogId, row.title, row.content, row.author, row.createTime, row.updateTime, row.password, row.commentsCount);
+}
 
 db.run(`CREATE TABLE IF NOT EXISTS blog(
     blogId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +85,7 @@ export class BlogModel {
      */
     static async get(blogId) {
         const blog = await db.get('SELECT * FROM blog WHERE blogId=?', [blogId]);
-        return blog;
+        return blogFromRow(blog);
     }
 
     /**
@@ -146,12 +158,21 @@ export class BlogModel {
     }
 
     /**
+     * Return the number of comments.
+     * @param {number} blogId 
+     * @returns {Promise<number>}
+     */
+    static async getCommentsCount(blogId) {
+        return (await db.get('SELECT COUNT(*) AS count FROM comments WHERE blogId=?', [blogId])).count;
+    }
+
+    /**
      * Get all the blogs by an author.
      * @param {number} author 
-     * @returns Promise<{blogId: number}[]>
+     * @returns {Promise<Blog[]>}
      */
     static async getByAuthor(author) {
-        return await db.all('SELECT blogId FROM blog WHERE author=?', [author]);
+        return (await db.all('SELECT * FROM blog WHERE author=?', [author])).map(row => blogFromRow(row));
     }
 
     /**
@@ -163,7 +184,7 @@ export class BlogModel {
      */
     static async getMulti(skip = 0, limit = 10, extraSQL = '') {
         if (extraSQL.length > 0) extraSQL = `WHERE ${extraSQL}`;
-        return await db.all(`SELECT * FROM blog ${extraSQL} ORDER BY createTime DESC LIMIT ${limit} ${skip ? ('OFFSET ' + skip.toString()) : ''}`);
+        return (await db.all(`SELECT * FROM blog ${extraSQL} ORDER BY createTime DESC LIMIT ${limit} ${skip ? ('OFFSET ' + skip.toString()) : ''}`)).map(row => blogFromRow(row));
     }
 };
  

@@ -16,6 +16,7 @@ const PRIV = {
     DELETE_COMMENT: 1 << 9,
 
     USER_PROFILE: 1 << 10,
+    EDIT_USER: 1 << 11,
 };
 
 export default PRIV;

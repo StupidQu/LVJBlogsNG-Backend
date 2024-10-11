@@ -5,11 +5,10 @@ class NavHandler extends Handler {
         const NavItems = {
             NavItems: [
                 { label: 'Home', key: 'home' },
+                ...(this.user.uid > 1 ? [{ label: 'Post Blog', key: 'post' }] : []),
+                { label: 'User', key: 'user' },
             ],
         };
-        if (this.user.uid > 1) {
-            NavItems.NavItems.push({ label: 'Post Blog', key: 'post' });
-        }
         this.response.body = {
             ...NavItems,
             currentUser: this.user,

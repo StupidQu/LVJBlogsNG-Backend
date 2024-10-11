@@ -13,6 +13,7 @@ const app = new koa();
 const router = new Router();
 
 const logger = getLogger();
+await upgrade();
 
 export async function registerHandler(name, path, handlerClass) {
     router.all(name, path, async (ctx, next) => {
@@ -59,7 +60,6 @@ app
     .use(router.routes())
     .use(router.allowedMethods());
 
-await upgrade();
 
 /**
  * 
