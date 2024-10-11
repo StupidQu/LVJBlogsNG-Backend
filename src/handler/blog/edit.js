@@ -4,9 +4,9 @@ import { PRIV } from '../../model/user.js';
 
 class BlogEditHandler extends Handler {
     async post() {
-        /** @type {{title: string, content: string}} */
-        const { title, content } = this.ctx.request.body;
-        const { id } = this.request.params;
+        /** @type {{title: string, content: string, password?: string}} */
+        const { title, content, password } = this.ctx.request.body;
+        const { id } = this.ctx.request.params;
         const blog = await BlogModel.get(id);
         if (!blog) {
             this.fail('Blog not found.');
@@ -18,7 +18,7 @@ class BlogEditHandler extends Handler {
             return;
         }
         
-        await BlogModel.edit(id, title, content);
+        await BlogModel.edit(id, title, content, password);
         
         this.response.body = {
             success: true,
