@@ -16,7 +16,7 @@ class UserDetailHandler extends Handler {
         await Promise.all(blogs.map(blog => (async () => {
             blog.commentsCount = await BlogModel.getCommentsCount(blog.blogId);
         })()));
-        this.response.body = { user, blogs, canEdit: this.user.hasPriv(PRIV.EDIT_USER) || user.uid === this.user.uid };
+        this.response.body = { user, blogs, canEdit: this.user.hasPriv(PRIV.EDIT_USER) || (user.uid === this.user.uid && this.user.hasPriv(PRIV.USER_PROFILE)) };
     }
 }
 
